@@ -1,11 +1,12 @@
-const { app, BrowserWindow, Menu, ipcMain } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain} = require('electron');
+const { contextBridge } = require('electron');
+
 
 const url = require('url');
 const path = require('path');
 
 let mainWindow;
 let newProductWindow;
-let newWindow;
 
 // Reload in Development for Browser Windows
 if(process.env.NODE_ENV !== 'production') {
@@ -17,8 +18,8 @@ if(process.env.NODE_ENV !== 'production') {
 
 app.on('ready', () => {
 
-  // The Main Window
-  mainWindow = new BrowserWindow({width: 720, height: 600});
+  /////////////////// ACÁ ESTA EL LOGIN
+  mainWindow = new BrowserWindow({width: 1200, height: 823});
 
   mainWindow.loadURL(url.format({
     pathname: path.join(__dirname, 'views/index.html'),
@@ -37,6 +38,43 @@ app.on('ready', () => {
   });
 
 });
+
+function createMenuPrincipal(){
+  const newMenuPrincipal = new BrowserWindow({
+    width: 800,
+    height: 600,
+    title: 'Administración de archivos',
+    webPreferences: {
+      nodeIntegration: true,
+    }
+  });
+  newMenuPrincipal.setMenu(null);
+
+  newMenuPrincipal.loadURL(url.format ({
+    pathname: path.join(__dirname, 'views/menuPrincipal.html'),
+    protocol: 'file',
+    slashes: true
+  }));
+
+  ipcMain.on('abrir-menu-principal', () => {
+    createMenuPrincipal();
+});
+
+  newMenuPrincipal.on('closed', () =>{
+    app.quit();
+  })
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 function createNewProductWindow() {
@@ -57,23 +95,8 @@ function createNewProductWindow() {
   });
 }
 
-function createNewWindow() {
-  newWindow = new BrowserWindow({
-    width: 400,
-    height: 330,
-    title: 'Add A New Product'
-  });
-  newProductWindow.setMenu(null);
 
-  newProductWindow.loadURL(url.format({
-    pathname: path.join(__dirname, 'views/new-product.html'),
-    protocol: 'file',
-    slashes: true
-  }));
-  newProductWindow.on('closed', () => {
-    newProductWindow = null;
-  });
-}
+
 
 
 
@@ -103,6 +126,13 @@ const templateMenu = [
         accelerator: 'Ctrl+N',
         click() {
           createNewProductWindow();
+        }
+      },
+      {
+        label: 'Sección Principal',
+        accelerator: 'Ctrl+P',
+        click() {
+          createMenuPrincipal();
         }
       },
       {

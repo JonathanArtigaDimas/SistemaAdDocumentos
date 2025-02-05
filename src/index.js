@@ -18,7 +18,7 @@ if(process.env.NODE_ENV !== 'production') {
 
 app.on('ready', () => {
 
-  /////////////////// ACÁ ESTA EL LOGIN
+  /////////////////// ACÁ ESTA menu principal
   mainWindow = new BrowserWindow({width: 1200, height: 823});
 
   mainWindow.loadURL(url.format({
@@ -79,8 +79,8 @@ function createMenuPrincipal(){
 
 function createNewProductWindow() {
   newProductWindow = new BrowserWindow({
-    width: 400,
-    height: 330,
+    width: 600,
+    height: 395,
     title: 'Add A New Product'
   });
   newProductWindow.setMenu(null);
@@ -119,26 +119,20 @@ ipcMain.on('product:new', (e, newProduct) => {
 // Menu Template
 const templateMenu = [
   {
-    label: 'File',
+    label: 'Archivo',
     submenu: [
       {
-        label: 'New Product',
+        label: 'Subir Archivo',
         accelerator: 'Ctrl+N',
         click() {
           createNewProductWindow();
         }
       },
       {
-        label: 'Sección Principal',
+        label: 'Login',
         accelerator: 'Ctrl+P',
         click() {
           createMenuPrincipal();
-        }
-      },
-      {
-        label: 'Remove All Products',
-        click() {
-          mainWindow.webContents.send('products:remove-all');
         }
       },
       {

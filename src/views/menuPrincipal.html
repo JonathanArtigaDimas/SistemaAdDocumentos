@@ -1,3 +1,6 @@
+<!--
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,7 +17,8 @@
     <title>Administración de Documentos</title>
 </head>
 <body>
-    <section class="vh-50 gradient-custom">
+    
+  <section class="vh-50 gradient-custom">
         <div class="container py-5 w-75">
           <div class="row d-flex justify-content-center align-items-center h-100">
             <div class="col-12 col-md-8 col-lg-6 col-xl-5 ">
@@ -58,5 +62,191 @@
 
     </script>
     
+</body>
+</html>
+
+-->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Archivos</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+    </style>
+</head>
+<body>
+
+
+    <h1 id="etiquetaholaH1">HOLA</h1>
+    <p>  HOLA </p>
+    
+
+
+
+
+
+
+
+
+
+
+    <script>
+        // Almacenamiento de archivos
+        let files = JSON.parse(localStorage.getItem('files')) || [];
+
+        // Manejador de subida de archivos
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('fileInput');
+            const description = document.getElementById('fileDescription').value;
+            
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const newFile = {
+                        id: Date.now(),
+                        name: file.name,
+                        type: file.type || 'Archivo',
+                        date: new Date().toISOString().split('T')[0],
+                        description: description,
+                        content: e.target.result
+                    };
+                    
+                    files.push(newFile);
+                    localStorage.setItem('files', JSON.stringify(files));
+                    updateFilesTable();
+                    document.getElementById('uploadForm').reset();
+                };
+                
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Función para actualizar la tabla de archivos
+        function updateFilesTable(filteredFiles = files) {
+            const tbody = document.getElementById('filesTableBody');
+            tbody.innerHTML = '';
+            
+            filteredFiles.forEach(file => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${file.name}</td>
+                    <td>${file.type}</td>
+                    <td>${file.date}</td>
+                    <td>${file.description}</td>
+                    <td>
+                        <button onclick="printFile(${file.id})" class="action-btn print-btn">🖨️</button>
+                        <button onclick="editFile(${file.id})" class="action-btn edit-btn">✏️</button>
+                        <button onclick="deleteFile(${file.id})" class="action-btn delete-btn">🗑️</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Función de búsqueda
+        document.getElementById('searchBtn').addEventListener('click', function() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const searchDate = document.getElementById('searchDate').value;
+            
+            const filteredFiles = files.filter(file => {
+                const matchesSearch = file.name.toLowerCase().includes(searchTerm) || 
+                                    file.description.toLowerCase().includes(searchTerm);
+                const matchesDate = !searchDate || file.date === searchDate;
+                return matchesSearch && matchesDate;
+            });
+            
+            updateFilesTable(filteredFiles);
+        });
+
+        // Función para eliminar archivo
+        function deleteFile(id) {
+            if (confirm('¿Está seguro de que desea eliminar este archivo?')) {
+                files = files.filter(file => file.id !== id);
+                localStorage.setItem('files', JSON.stringify(files));
+                updateFilesTable();
+            }
+        }
+
+        // Función para imprimir archivo
+        function printFile(id) {
+            const file = files.find(f => f.id === id);
+            if (file) {
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(`
+                    <html>
+                        <head>
+                            <title>${file.name}</title>
+                        </head>
+                        <body>
+                            <h1>${file.name}</h1>
+                            <p><strong>Fecha:</strong> ${file.date}</p>
+                            <p><strong>Descripción:</strong> ${file.description}</p>
+                            ${file.type.includes('image') ? 
+                                `<img src="${file.content}" style="max-width: 100%;">` : 
+                                `<pre>${file.content}</pre>`}
+                        </body>
+                    </html>
+                `);
+                printWindow.document.close();
+                printWindow.print();
+            }
+        }
+
+        // Función para editar archivo
+        function editFile(id) {
+            const file = files.find(f => f.id === id);
+            if (file) {
+                const newDescription = prompt('Editar descripción:', file.description);
+                if (newDescription !== null) {
+                    file.description = newDescription;
+                    localStorage.setItem('files', JSON.stringify(files));
+                    updateFilesTable();
+                }
+            }
+        }
+
+        // Cargar archivos al iniciar
+        updateFilesTable();
+    </script>
 </body>
 </html>
